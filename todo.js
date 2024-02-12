@@ -25,10 +25,11 @@ todoInput.addEventListener("input", (e) => {
 
 todoSubmit.addEventListener("click", () => {
   if (todoContent.trim()) {
-    todoMap.set(
-      `todo_${Math.floor(Math.random() * 10000)}`,
-      todoContent.trim()
-    );
+    const newObject = {
+      content: todoContent.trim(),
+      isCompleted: false,
+    };
+    todoMap.set(`todo_${Math.floor(Math.random() * 10000)}`, newObject);
 
     todoInput.value = "";
     todoContent = "";
@@ -46,35 +47,53 @@ todoSpace.addEventListener("click", (e) => {
     addToStorage(todoMap);
     renderList();
   }
-  // else if (e.target.classList.contains("edit-button")) {
-  //   const button = document.querySelector(".edit-button");
-  //   const todoId = button.getId(".edit-button");
-  //   if (todoMap.has(todoId)) {
-  //     const newContent = captureFromKeys();
-  //     todoMap.set(todoId, newContent);
-  //   }
-  // }
 });
 
+///////////////////////////////////////////////////////
+//!Edit Button
 todoSpace.addEventListener("click", (e) => {
   if (e.target.classList.contains("edit-button")) {
     const button = document.querySelector(".edit-button");
     const todoId = button.getAttribute("data-todo-id");
-    const editableArea = document.getElementById(`${todoId}`);
-
-    editableArea.addEventListener("keydown", () => {
-      // Listen for blur event after editing
-      const newContent = captureFromKeys(editableArea); // Capture new content
-      if (newContent !== value) {
-        // Only update if content changed
-        todoMap.set(key, newContent);
-        addToStorage(todoMap); // Update storage
-        renderList(); // Re-render the list with updated content
-      }
-      editableArea.classList.remove("focused");
-    });
+    const editableArea = document.getElementById(`${todoId}`).textContent;
+    const newText = prompt("Edit the Todo Item", editableArea);
+    if (newText !== null && newText !== "") {
+      editTodo(todoId, newText);
+    }
   }
 });
+
+const editTodo = (todoId, updatedTodoText) => {
+  if (todoMap.has(todoId) && todoMap.get(todoId).isCompleted === false) {
+    todoMap.get(todoId).content = updatedTodoText;
+    addToStorage(todoMap);
+    renderList(todoMap);
+  } else {
+    alert("Please uncheck to edit");
+  }
+};
+
+/////////////////////////////////////////////////////////////
+//!checkbox
+
+todoSpace.addEventListener("change", (e) => {
+  if (e.target.classList.contains("checkbox-button")) {
+    const input = document.querySelector(".checkbox-button");
+    const todoId = input.getAttribute("data-todo-id");
+    const isChecked = e.target.checked;
+    console.log(e.target);
+    toggleTodoCompletion(todoId, isChecked);
+  }
+});
+
+const toggleTodoCompletion = (todoId, isChecked) => {
+  if (todoMap.has(todoId)) {
+    todoMap.get(todoId).isCompleted = isChecked;
+    console.log(todoMap);
+    addToStorage(todoMap);
+    renderList(todoMap);
+  }
+};
 
 const captureFromKeys = (editableArea) => {
   let currentContent = "";
@@ -97,6 +116,15 @@ const addToStorage = (todoMap) => {
 
 const renderList = () => {
   // console.log(todoMap);
+  const formatter = new Intl.DateTimeFormat("en-US", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+  const date = new Date();
+
+  const formattedDate = formatter.format(date);
+
   todoSpace.innerHTML = "";
   todoMap.forEach((value, key) => {
     console.log(value, key);
@@ -105,9 +133,16 @@ const renderList = () => {
     <li class="flex w-full items-center justify-start p-4 md:p-6 todo-item">
     <input
       type="checkbox"
-      id="checkbox-1"
-      class="absolute h-5 w-5 cursor-pointer opacity-0 md:h-6 md:w-6 [&:checked+div+p]:text-[#898989] [&:checked+div+p]:line-through [&:checked+div]:bg-green-500 [&:checked+div_svg]:block"
-      name="checkbox-1" />
+      id="checkbox-${key}"
+      data-todo-id="${key}"
+      class="checkbox-button absolute h-5 w-5 cursor-pointer opacity-0 md:h-6 md:w-6 ${
+        value.isCompleted
+          ? "checked [&:checked+div+p]:text-[#898989] [&:checked+div+p]:line-through [&:checked+div]:bg-green-500 [&:checked+div_svg]:block"
+          : ""
+      }"
+      name="checkbox-1" 
+      ${value.isCompleted ? "checked" : ""}
+      />
     <div class="mr-2 flex h-5 w-5 flex-shrink-0 items-center justify-center border-[1px] border-white bg-transparent focus-within:border-white md:mr-4 md:h-6 md:w-6 todo-item">
       <svg
         class="pointer-events-none hidden h-3 w-3 fill-current text-white"
@@ -130,9 +165,9 @@ const renderList = () => {
     <p
       id="${key}"
       class="mr-3 truncate text-left text-sm font-semibold text-white md:text-base todo-item">
-      ${value}
+      ${value.content}
     </p>
-    <div class="ml-auto flex flex-shrink-0 border-[1px] border-white px-2 py-1 text-xs text-white md:text-sm">10 Aug 2023</div>
+    <div class="ml-auto flex flex-shrink-0 border-[1px] border-white px-2 py-1 text-xs text-white md:text-sm">${formattedDate}</div>
     <button class="ml-2 flex flex-shrink-0 border-[1px] border-red-500 bg-red-500 p-1 remove-button" data-todo-id="${key}">
       <svg
         xmlns="http://www.w3.org/2000/svg"
