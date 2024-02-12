@@ -10,7 +10,7 @@ chrome.storage.local.get("todo").then((data) => {
   } else {
     if (data.todo) {
       todoMap = new Map(Object.entries(data.todo));
-      console.log(todoMap);
+      // console.log(todoMap);
       renderList();
     } else {
       console.log("No saved todo Map found.");
@@ -81,7 +81,7 @@ todoSpace.addEventListener("change", (e) => {
     const input = document.querySelector(".checkbox-button");
     const todoId = input.getAttribute("data-todo-id");
     const isChecked = e.target.checked;
-    console.log(e.target);
+    // console.log(e.target);
     toggleTodoCompletion(todoId, isChecked);
   }
 });
@@ -89,18 +89,10 @@ todoSpace.addEventListener("change", (e) => {
 const toggleTodoCompletion = (todoId, isChecked) => {
   if (todoMap.has(todoId)) {
     todoMap.get(todoId).isCompleted = isChecked;
-    console.log(todoMap);
+    // console.log(todoMap);
     addToStorage(todoMap);
     renderList(todoMap);
   }
-};
-
-const captureFromKeys = (editableArea) => {
-  let currentContent = "";
-  editableArea.addEventListener("keydown", (e) => {
-    console.log(e);
-    return currentContent;
-  });
 };
 
 const addToStorage = (todoMap) => {
