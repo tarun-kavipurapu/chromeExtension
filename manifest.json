@@ -6,15 +6,15 @@
   "action": {
     "default_popup": "popup.html"
   },
-  "permissions": [
-    "declarativeNetRequest",
-    "declarativeNetRequestFeedback",
-    "tabs",
-    "activeTab",
-    "storage"
-  ],
+  "permissions": ["tabs", "activeTab", "storage", "webRequest"],
   "background": {
     "service_worker": "background.js"
   },
-  "host_permissions": ["http://*/*", "https://*/*"]
+  "host_permissions": ["http://*/*", "https://*/*"],
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"]
+    }
+  ]
 }
